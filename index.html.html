@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TRISCANNER - explainable scam and phishing check</title>
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#02040a;--navy:#0a1736;--navy2:#0e2150;--line:#1b3166;--text:#e7edfb;--mute:#8ea2cc;--accent:#5b9bff;
+--link:#4dd4ff;--language:#ffb84d;--ask:#ff6b8b;--low:#3ddc97;--mid:#ffb84d;--high:#ff5d6c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.55 'Source Sans 3',system-ui,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 20px 48px}
+header{display:flex;align-items:center;gap:12px;padding:8px 0 28px}
+.logo{width:30px;display:grid;gap:4px}
+.logo i{display:block;height:5px;border-radius:3px}
+.logo i:nth-child(1){background:var(--link);width:100%}
+.logo i:nth-child(2){background:var(--language);width:72%}
+.logo i:nth-child(3){background:var(--ask);width:44%}
+.brand{font:700 21px/1 Sora,system-ui,sans-serif;letter-spacing:.06em}
+h1{font:700 clamp(28px,5vw,46px)/1.12 Sora,system-ui,sans-serif;margin:0 0 12px;max-width:20ch}
+.sub{color:var(--mute);max-width:56ch;margin:0 0 28px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--navy);border:1px solid var(--line);border-radius:14px;padding:20px}
+label.t{display:block;font:500 15px Sora,sans-serif;margin-bottom:10px}
+textarea{width:100%;min-height:190px;resize:vertical;background:#050c1f;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:14px;font:16px/1.5 'Source Sans 3',system-ui,sans-serif}
+textarea::placeholder{color:#5f7399}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{font:inherit;cursor:pointer}
+.go{background:var(--accent);color:#02040a;border:0;border-radius:10px;padding:12px 22px;font:700 16px Sora,sans-serif}
+.go:hover{filter:brightness(1.1)}
+.ghost{background:transparent;color:var(--text);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px}
+.ghost:hover{border-color:var(--accent)}
+.hint{color:var(--mute);font-size:14px;margin:18px 0 0}
+.lens{display:grid;grid-template-columns:96px 1fr 52px;gap:12px;align-items:center;margin-bottom:14px}
+.lens b{font:500 15px Sora,sans-serif}
+.lens small{display:block;color:var(--mute);font-size:12.5px;font-weight:400;font-family:'Source Sans 3',sans-serif}
+.track{height:10px;background:#050c1f;border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+.fill{height:100%;width:0;border-radius:5px;transition:width .6s ease}
+.lens .n{color:var(--mute);font-size:14px;text-align:right}
+.verdict{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:20px 0 6px;padding-top:18px;border-top:1px solid var(--line)}
+.verdict h2{font:700 28px Sora,sans-serif;margin:0}
+.verdict span{color:var(--mute)}
+.v-low h2{color:var(--low)}.v-mid h2{color:var(--mid)}.v-high h2{color:var(--high)}
+.msg{white-space:pre-wrap;word-break:break-word;background:#050c1f;border:1px solid var(--line);border-radius:10px;padding:14px;margin:8px 0 6px}
+mark{color:inherit;border-radius:3px;padding:1px 2px}
+.m-link{background:rgba(77,212,255,.2);border-bottom:2px solid var(--link)}
+.m-language{background:rgba(255,184,77,.2);border-bottom:2px solid var(--language)}
+.m-ask{background:rgba(255,107,139,.22);border-bottom:2px solid var(--ask)}
+h3{font:500 16px Sora,sans-serif;margin:22px 0 8px}
+ul{margin:0;padding:0;list-style:none}
+.sig{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #12234d}
+.sig b{font:700 14px Sora,sans-serif;border-radius:6px;text-align:center;padding:3px 0;height:fit-content;color:#02040a}
+.sig.link b{background:var(--link)}.sig.language b{background:var(--language)}.sig.ask b{background:var(--ask)}
+.sig q{display:block;color:var(--mute);font-size:14px;quotes:none;word-break:break-all}
+.good{color:var(--low);padding:4px 0}
+.todo li{padding:6px 0 6px 22px;position:relative}
+.todo li::before{content:"";position:absolute;left:4px;top:15px;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+details{margin-top:20px;border:1px solid var(--line);border-radius:10px;padding:12px 16px;background:#081330}
+summary{cursor:pointer;font:500 15px Sora,sans-serif}
+.note{color:var(--mute);font-size:14px;margin-top:20px}
+footer{margin-top:36px;color:var(--mute);font-size:14px;max-width:70ch}
+@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="logo" aria-hidden="true"><i></i><i></i><i></i></div><div class="brand">TRISCANNER</div></header>
+<h1>Paste a message or link. See exactly why it is risky.</h1>
+<p class="sub">TRISCANNER checks three things in every suspicious message: the link, the language, and what it asks you to do. Every point of the score is explained.</p>
+
+<div class="grid">
+<section class="panel" aria-label="Input">
+<label class="t" for="in">Suspicious SMS, email, WhatsApp text or link</label>
+<textarea id="in" placeholder="Paste it here. Nothing leaves your device."></textarea>
+<div class="row"><button class="go" id="go">Scan it</button><button class="ghost" id="clr">Clear</button></div>
+<p class="hint">Try an example</p>
+<div class="row" style="margin-top:6px" id="ex"></div>
+</section>
+
+<section class="panel" aria-label="Result">
+<div id="res"></div>
+</section>
+</div>
+
+<footer>TRISCANNER runs fixed rules in your browser and sends your text nowhere. Rules can miss new scams. If you are unsure, contact the company using the number on its official website, never the one in the message.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const LAYERS={link:['Link','Where it sends you'],language:['Language','How it pressures you'],ask:['Ask','What it wants from you']};
+const BRANDS={paytm:'paytm.com',phonepe:'phonepe.com',sbi:'sbi.co.in|onlinesbi.sbi',hdfc:'hdfcbank.com',icici:'icicibank.com',axis:'axisbank.com',amazon:'amazon.in|amazon.com',flipkart:'flipkart.com',google:'google.com',netflix:'netflix.com',irctc:'irctc.co.in',paypal:'paypal.com',instagram:'instagram.com',whatsapp:'whatsapp.com',microsoft:'microsoft.com',incometax:'incometax.gov.in'};
+const SHORT=['bit.ly','tinyurl.com','t.co','cutt.ly','rb.gy','is.gd','shorturl.at','tiny.cc','goo.gl'];
+const PATS=[
+{id:'urg',layer:'language',pts:14,re:/\b(urgent(ly)?|immediately|right now|within \d+ ?(hours?|hrs?|mins?|minutes)|expires? (today|soon)|last (warning|chance)|final notice|act now|today only)\b/,msg:'Creates time pressure so you act before you think.'},
+{id:'thr',layer:'language',pts:16,re:/\b(blocked|suspended|deactivated|legal action|arrest(ed)?|police|case (has been )?(filed|registered)|account (will be )?closed)\b/,msg:'Threatens a bad outcome to scare you.'},
+{id:'rew',layer:'language',pts:14,re:/\b(congratulations|you (have )?won|lottery|prize|cashback|reward points?|free gift|bonus|refund)\b/,msg:'Offers something that looks too good to be true.'},
+{id:'aut',layer:'language',pts:8,re:/\b(rbi|income tax|customs|trai|cbi|fedex|dhl|india post|kyc|aadhaar|pan card)\b/,msg:'Claims to be an authority you trust.'},
+{id:'gen',layer:'language',pts:8,re:/\b(dear (customer|user|sir|madam|valued)|valued customer)\b/,msg:'Generic greeting. Real senders usually use your name.'},
+{id:'otp',layer:'ask',pts:34,re:/\b(otp|pin|cvv|password|passcode|card number)\b/,msg:'Asks for an OTP, PIN, CVV or password. Real companies never do.'},
+{id:'app',layer:'ask',pts:30,re:/\b(apk|anydesk|teamviewer|quicksupport|install (the )?app|download (the )?app)\b/,msg:'Asks you to install software, which can give scammers control of your phone.'},
+{id:'pay',layer:'ask',pts:22,re:/\b(registration fee|processing fee|advance (payment|amount)|gift cards?|crypto|usdt|customs duty|pay (₹|rs\.?|inr)?\s?\d+|transfer (₹|rs\.?)?\s?\d+)/,msg:'Asks for money upfront.'},
+{id:'ver',layer:'ask',pts:18,re:/\b(verify|update|confirm|re-?activate|complete) (your )?(kyc|account|details|identity|profile|bank|pan|aadhaar)\b/,msg:'Pushes you to "verify" personal details through a link.'},
+{id:'job',layer:'ask',pts:20,re:/\b(work from home|earn (up to )?(₹|rs\.?)?\s?\d[\d,]*\s?(per|a|\/) ?(day|hour|week)|part[- ]time (job|work)|task[- ]based|liking videos)\b/,msg:'Matches a common fake job-offer pattern.'},
+{id:'call',layer:'ask',pts:10,re:/\b(call|whatsapp|text)\b[^.\n]{0,25}\+?\d[\d\s-]{8,}\d/,msg:'Moves you off to a phone number or chat.'}
+];
+const URLRE=/(?:https?:\/\/|www\.)[^\s<>"']+|\b(?:[a-z0-9-]+\.)+(?:com|in|net|org|xyz|top|click|support|live|icu|work|cfd|zip|link|ly|me|co|info|site|online)\b(?:\/[^\s<>"']*)?/gi;
+
+function linkSignals(raw,idx,S){
+  let u;try{u=new URL(/^https?:/i.test(raw)?raw:'http://'+raw)}catch(e){return}
+  const host=u.hostname.toLowerCase(),why=[];
+  const add=(pts,msg)=>{S.sig.push({layer:'link',pts,msg,ref:host});why.push(msg)};
+  if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host))add(25,'Uses a raw IP address instead of a company name.');
+  if(host.includes('xn--'))add(25,'Uses disguised characters that imitate a real name.');
+  if(SHORT.includes(host))add(15,'Shortened link hides the real destination.');
+  if(/\.(xyz|top|click|work|icu|live|support|cfd|zip|link|site|online)$/.test(host))add(15,'Uses a cheap domain ending often seen in scams.');
+  if(u.username)add(20,'Contains an "@" that hides the real destination.');
+  if(host.split('.').length>4)add(10,'Has an unusually long chain of subdomains.');
+  if((host.match(/-/g)||[]).length>=2)add(8,'Several hyphens, a common trick in fake domains.');
+  if(/login|verify|kyc|secure|update|claim|refund/.test(host+u.pathname))add(8,'Link wording pushes you to log in or verify.');
+  let official=false;
+  const toks=host.split(/[.-]/);
+  for(const [b,offs] of Object.entries(BRANDS)){
+    const list=offs.split('|');
+    if(list.some(o=>host===o||host.endsWith('.'+o))){official=true;S.good.add('The link goes to the official '+list[0]+' domain.');break}
+    const test=k=>k===b||(b.length>=5&&k.includes(b));
+    const hit=toks.some(test);
+    const norm=toks.map(k=>k.replace(/0/g,'o').replace(/1/g,'l').replace(/rn/g,'m').replace(/vv/g,'w')).some(test);
+    if(hit||norm){add(30,hit?'Uses the name "'+b+'" but is not its official site ('+list[0]+').':'Imitates "'+b+'" with look-alike characters.');break}
+  }
+  if(/^http:/i.test(raw))add(8,'Not encrypted (http instead of https).');
+  else if(!why.length&&!official)S.good.add('The link uses https and shows none of the usual tricks.');
+  if(why.length)S.ranges.push({s:idx,e:idx+raw.length,layer:'link',why:why[0]});
+}
+
+function analyze(t){
+  const S={sig:[],good:new Set(),ranges:[]};
+  let m;URLRE.lastIndex=0;
+  while((m=URLRE.exec(t))){linkSignals(m[0].replace(/[.,;)]+$/,''),m.index,S)}
+  const safeOtp=/\b(do not|don'?t|never)\b[^.]{0,25}\bshare\b/i.test(t);
+  for(const p of PATS){
+    if(p.id==='otp'&&safeOtp){S.good.add('It warns you not to share your OTP, which is what a real sender says.');continue}
+    const re=new RegExp(p.re.source,'gi');let first=null;
+    while((m=re.exec(t))){first=first||m[0];S.ranges.push({s:m.index,e:m.index+m[0].length,layer:p.layer,why:p.msg});if(!m[0].length)re.lastIndex++}
+    if(first)S.sig.push({layer:p.layer,pts:p.pts,msg:p.msg,ref:first});
+  }
+  if(S.sig.some(x=>x.layer==='language')&&S.sig.some(x=>x.layer==='ask'))S.sig.push({layer:'ask',pts:10,msg:'Pressure plus a request for action is the classic scam combination.',ref:''});
+  const by={link:0,language:0,ask:0};S.sig.forEach(x=>by[x.layer]+=x.pts);
+  S.by=by;S.score=Math.min(100,by.link+by.language+by.ask);S.t=t;
+  return S;
+}
+
+function lenses(S,filled){
+  return Object.entries(LAYERS).map(([k,[n,h]])=>{
+    const pts=S?S.by[k]:0,pct=filled&&S?Math.min(100,pts/45*100):0;
+    return `<div class="lens"><b>${n}<small>${h}</small></b><div class="track"><div class="fill" id="f-${k}" style="width:${pct}%;background:var(--${k})"></div></div><span class="n" id="n-${k}">${filled&&S?(pts?'+'+pts:'clear'):''}</span></div>`}).join('');
+}
+
+function detail(S){
+  const t=S.t,sc=S.score;
+  const v=sc>=55?['high','High risk','Treat this as a scam. Do not click, reply or share anything.']:sc>=25?['mid','Suspicious','Several warning signs. Check with the real company through its official app or website before you act.']:['low','No strong warning signs','Nothing alarming matched. Still check the sender before acting on anything involving money or personal details.'];
+  const rs=S.ranges.sort((a,b)=>a.s-b.s||b.e-a.e);let out='',pos=0;
+  for(const r of rs){if(r.s<pos)continue;out+=esc(t.slice(pos,r.s))+`<mark class="m-${r.layer}" title="${esc(r.why)}">${esc(t.slice(r.s,r.e))}</mark>`;pos=r.e}
+  out+=esc(t.slice(pos));
+  const sigs=S.sig.length?S.sig.map(x=>`<li class="sig ${x.layer}"><b>+${x.pts}</b><div>${esc(x.msg)}${x.ref?`<q>${esc(x.ref)}</q>`:''}</div></li>`).join(''):'<li class="good" style="color:var(--mute)">No risky patterns matched.</li>';
+  const goods=[...S.good].map(g=>`<li class="good">&#10003; ${esc(g)}</li>`).join('');
+  const short=t.length<25?'<p class="note">This is very short, so there is little to judge. Paste the full message if you can.</p>':'';
+  const todo=sc>=25?['Do not click the link or call any number in the message.','Never share an OTP, PIN or password with anyone.','Open the company\'s official app or type its website yourself to check.','Report it: forward SMS to 1909 or report at cybercrime.gov.in.']:['Confirm the sender through the official app or website.','If it asks for money or details later, scan it again.'];
+  return `<div class="verdict v-${v[0]}"><h2>${v[1]}</h2><span>${sc} / 100</span></div><p style="margin:0">${v[2]}</p>${short}
+  <h3>Your message, with evidence marked</h3><div class="msg">${out}</div>
+  <h3>Why this score</h3><ul>${sigs}${goods}</ul>
+  <h3>What to do now</h3><ul class="todo">${todo.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <details><summary>Already clicked, paid or shared something?</summary><ul class="todo" style="margin-top:10px">
+  <li>Call your bank right away to block the card or UPI, and ask about reversing the payment.</li>
+  <li>Call the national cybercrime helpline 1930 and file a report at cybercrime.gov.in as soon as you can.</li>
+  <li>Change the password of any account you typed into, then turn on two-step verification.</li>
+  <li>Uninstall any app you were asked to install, and restart the phone.</li>
+  <li>Tell family or friends, since scammers often reuse stolen contacts.</li></ul></details>
+  <p class="note">Rule-based check. It can miss new scam styles, so treat a low score as "no obvious signs", not "safe".</p>`;
+}
+
+async function scan(){
+  const ta=$('#in'),res=$('#res'),t=ta.value.trim();
+  if(!t){res.innerHTML=lenses()+'<p class="note">Paste a message or link first, or try an example.</p>';ta.focus();return}
+  const S=analyze(t);
+  res.innerHTML=lenses(S,false)+'<div id="detail" aria-live="polite"></div>';
+  const fast=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(const k of Object.keys(LAYERS)){
+    if(!fast)await sleep(450);
+    $('#f-'+k).style.width=Math.min(100,S.by[k]/45*100)+'%';
+    $('#n-'+k).textContent=S.by[k]?'+'+S.by[k]:'clear';
+  }
+  if(!fast)await sleep(350);
+  $('#detail').innerHTML=detail(S);
+}
+
+const EX={
+'Bank KYC SMS':'SBI Alert: Your YONO account will be blocked within 24 hours due to incomplete KYC. Update now: http://sbi-kyc-update.xyz/login Do not ignore.',
+'Parcel fee':'India Post: your parcel is held at customs. Pay ₹49 customs duty today to release it: https://bit.ly/3xParcel',
+'Job offer':'Part-time work from home! Earn ₹5000 per day liking videos. Join now, call us on WhatsApp +91 98765 43210. Registration fee ₹499.',
+'Genuine OTP':'Your OTP for login to Amazon is 482913. Do not share this OTP with anyone. Amazon will never ask for it. https://www.amazon.in/help'
+};
+for(const k of Object.keys(EX)){const b=document.createElement('button');b.className='ghost';b.textContent=k;b.onclick=()=>{$('#in').value=EX[k];scan()};$('#ex').appendChild(b)}
+$('#go').onclick=scan;
+$('#clr').onclick=()=>{$('#in').value='';$('#res').innerHTML=lenses()+'<p class="note">Paste something suspicious and the three lenses will fill in.</p>';$('#in').focus()};
+$('#res').innerHTML=lenses()+'<p class="note">Paste something suspicious and the three lenses will fill in.</p>';
+</script>
+</body>
+</html>
